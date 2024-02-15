@@ -1,0 +1,42 @@
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Sample movie data (title and description)
+movies_data = [
+    {"title": "The Shawshank Redemption", "description": "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency."},
+    {"title": "The Godfather", "description": "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son."},
+    {"title": "The Dark Knight", "description": "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice."},
+    {"title": "Forrest Gump", "description": "The presidencies of Kennedy and Johnson, the Vietnam War, the Watergate scandal and other historical events unfold from the perspective of an Alabama man with an IQ of 75, whose only desire is to be reunited with his childhood sweetheart."},
+    {"title": "Inception", "description": "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O."},
+    {"title": "The Matrix", "description": "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers."}
+]
+
+# Function to recommend movies based on user preferences
+def recommend_movies(user_preferences, movies_data, top_n=3):
+    # Extract descriptions from movie data
+    movie_descriptions = [movie['description'] for movie in movies_data]
+
+    # Create TF-IDF vectorizer
+    vectorizer = TfidfVectorizer(stop_words='english')
+    tfidf_matrix = vectorizer.fit_transform(movie_descriptions)
+
+    # Transform user preferences into TF-IDF vector
+    user_preferences_vector = vectorizer.transform([user_preferences])
+
+    # Calculate cosine similarity between user preferences and movie descriptions
+    cosine_similarities = cosine_similarity(user_preferences_vector, tfidf_matrix)
+
+    # Get indices of top recommended movies
+    movie_indices = cosine_similarities.argsort()[0][-top_n:][::-1]
+
+    # Return recommended movies
+    recommended_movies = [movies_data[idx]['title'] for idx in movie_indices]
+    return recommended_movies
+
+# Example of recommending movies based on user preferences
+user_preferences = "crime drama"
+recommended_movies = recommend_movies(user_preferences, movies_data)
+print("Recommended Movies:")
+for movie in recommended_movies:
+    print(movie)
